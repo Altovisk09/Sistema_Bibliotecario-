@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="66955f3d-05ff-411e-862f-d5fab95ff355" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/com/library/exceptions/InvalidFieldException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/library/exceptions/UserLoanLimitException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/com/library/exceptions/UserNotEligibleForLoanException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/library/exceptions/IllegalDeletionException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/library/exceptions/NotFoundException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/library/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/library/Main.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/library/model/UserType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/library/model/UserType.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/library/service/LibraryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/library/service/LibraryService.java" afterDir="false" />
     </list>
@@ -29,12 +27,16 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;Altovisk09&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "history": [
+    {
+      "assignee": "Altovisk09"
+    }
+  ],
+  "lastFilter": {
+    "assignee": "Altovisk09"
   }
-}</component>
+}]]></component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Altovisk09/Sistema_Bibliotecario-&quot;,

@@ -1,9 +1,6 @@
 package com.library.service;
 
-import com.library.exceptions.BookUnavailableException;
-import com.library.exceptions.InvalidFieldException;
-import com.library.exceptions.UserLoanLimitException;
-import com.library.exceptions.UserNotEligibleForLoanException;
+import com.library.exceptions.*;
 import com.library.model.*;
 import com.library.util.IdGenerator;
 
@@ -132,16 +129,16 @@ public class LibraryService {
         System.out.println("Sem usuários cadastrados");
     }
 
-    public void searchUserById(int id) {
-        User findUser = usersList.stream()
+    public User findUserById(Integer id) throws NotFoundException, InvalidFieldException {
+        if (id == null) {
+            throw new InvalidFieldException("Campo Id deve ser preenchido");
+        }
+
+        return usersList.stream()
                 .filter(user -> user.getId() == id)
                 .findFirst()
-                .orElse(null);
-        if (findUser != null) {
-            System.out.println(findUser);
-        } else {
-            System.out.println("Usuário não encontrado");
-        }
+                .orElseThrow(() -> new NotFoundException("Usuário não encontrado."));
+
     }
 
     private List<Loan> activeLoansByUser(User user) {
@@ -166,7 +163,7 @@ public class LibraryService {
                 .map(loan -> String.format("%s (previsto: %s)", loan.getBook().getName(), loan.getFinalDate()))
                 .collect(Collectors.joining("\n"));
 
-        throw new UserNotEligibleForLoanException(message);
+        throw new UserNotEligibleForLoanException("Usuário: " + user.getName() + "possui" + lateReturnsList.size() + "\n" + message);
     }
 
     private void checkLoanLimit(List<Loan> list, User user) throws UserLoanLimitException {
@@ -175,6 +172,50 @@ public class LibraryService {
 
         if (loanLimit >= currentLoanActive) {
             throw new UserLoanLimitException("Limite de %d empréstimos simultaneos foi atingido, devolva algum dos livros em sua posse para pegar outro.");
+        }
+    }
+
+    public void updateUser(int userId, String userName, UserType type) {
+        try {
+            User user = findUserById(userId);
+            boolean noNameProvided = (userName == null || userName.isBlank());
+            boolean noTypeProvided = (type == null);
+            if (noNameProvided && noTypeProvided) {
+                throw new InvalidFieldException("Novos dados para atualização não informados.");
+            }
+
+            if (!noNameProvided) {
+                user.setName(userName);
+                System.out.println("Nome de usuário alterado para: " + userName);
+            }
+            if (!noTypeProvided) {
+                user.setUserType(type);
+                System.out.println("Tipo da conta alterada para: " + type.getDisplayName());
+            }
+        } catch (NotFoundException
+                 | InvalidFieldException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void deleteUser(int userId) {
+        try {
+            User findUser = findUserById(userId);
+            List<Loan> activeLoans = activeLoansByUser(findUser);
+            if (!activeLoans.isEmpty()) {
+                String loanListMessage = activeLoans.stream()
+                        .map(loan -> String.format("- \"%s\" (previsão de devolução: %s)",
+                                loan.getBook().getName(),
+                                loan.getFinalDate())).collect(Collectors.joining("\n"));
+                throw new IllegalDeletionException("Usuário possui devoluções pendentes: \n" + loanListMessage);
+            }
+
+            usersList.remove(findUser);
+            System.out.println("Usuário \"" + findUser.getName() + "\" removido com sucesso.");
+        } catch (NotFoundException |
+                 InvalidFieldException |
+                 IllegalDeletionException e) {
+            System.out.println("[ERRO]: " + e.getMessage());
         }
     }
 }
