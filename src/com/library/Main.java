@@ -1,5 +1,6 @@
 package com.library;
 
+import com.library.model.User;
 import com.library.model.UserType;
 import com.library.service.LibraryService;
 
@@ -10,6 +11,8 @@ public class Main {
         service.createUser("Eric", UserType.STUDENT_GRADUATION);
         service.createUser("Eric", UserType.STUDENT_POSTGRADUATION);
         service.listUsers();
-        service.findUserByIdSafe(1);
+        User user = service.findUserByIdSafe(1);
+        System.out.println(user);
+
     }
 }

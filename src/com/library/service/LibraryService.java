@@ -123,8 +123,9 @@ public class LibraryService {
             for (User user : usersList) {
                 System.out.println(user);
             }
+        } else {
+            System.out.println("Sem usuários cadastrados");
         }
-        System.out.println("Sem usuários cadastrados");
     }
 
     public User findUserById(Integer id) throws NotFoundException, InvalidFieldException {
@@ -213,6 +214,107 @@ public class LibraryService {
         } catch (NotFoundException | InvalidFieldException | IllegalDeletionException e) {
             System.out.println("[ERRO]: " + e.getMessage());
         }
+    }
+
+    private Book findBookById(Integer id) throws NotFoundException, InvalidFieldException {
+        if (id == null) {
+            throw new InvalidFieldException("É necessário inserir o Id para buscar o livro.");
+        }
+        return booksList.stream()
+                .filter(book -> book.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Livro não encontrado, Id: " + id + " invalido"));
+    }
+
+    public Book findBookByIdSafe(Integer id) {
+        try {
+            if (id == null) {
+                throw new InvalidFieldException("É necessário inserir o Id para buscar o livro.");
+            }
+            return booksList.stream()
+                    .filter(book -> book.getId() == id)
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Livro não encontrado, Id: " + id + " invalido"));
+
+        } catch (InvalidFieldException |
+                 NotFoundException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void updateBook(Integer id, String bookName, String autorName, BookCategory category, int totalCopies) {
+        try {
+            Book findBook = findBookById(id);
+
+            boolean validBookName = bookName != null && !bookName.isBlank();
+            boolean validAutorName = autorName != null && !autorName.isBlank();
+            boolean validCategory = category != null;
+
+            // não pode atualizar para um total menor do que os livros já emprestados
+            boolean validTotalCopies = totalCopies > 0 && totalCopies >= findBook.getAvailableCopies();
+
+            if (!validBookName && !validAutorName && !validCategory && !validTotalCopies) {
+                throw new InvalidFieldException("É necessário inserir ao menos um valor válido para realizar um update.");
+            }
+
+            if (validBookName) {
+                findBook.setName(bookName);
+                System.out.printf("Nome do livro (ID %d) alterado para: \"%s\".%n", id, bookName);
+            }
+
+            if (validAutorName) {
+                findBook.setAutorName(autorName);
+                System.out.printf("Autor do livro (ID %d) alterado para: \"%s\".%n", id, autorName);
+            }
+
+            if (validCategory) {
+                findBook.setCategory(category);
+                System.out.printf("Categoria do livro (ID %d) alterada para: \"%s\".%n", id, findBook.getName());
+            }
+
+            if (validTotalCopies) {
+                findBook.setTotalCopies(totalCopies);
+                System.out.printf("Total de cópias do livro (ID %d) atualizado para: %d.%n", id, totalCopies);
+            }
+
+        } catch (InvalidFieldException | NotFoundException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+        }
+    }
+
+    public void deleteBook(Integer id) {
+        try {
+            Book findBook = findBookById(id);
+            List<Loan> activeLoans = findActiveLoanByBookId(id);
+            if (!activeLoans.isEmpty()) {
+                String errorMessage = activeLoans.stream()
+                        .map(loan -> String.format("- (Usuário: %s, Devolução prevista: %s)",
+                                loan.getUser().getName(),
+                                loan.getFinalDate()))
+                        .collect(Collectors.joining("\n"));
+
+                throw new IllegalDeletionException(String.format("Existem devoluções pendentes para o livro \"%s\" (ID %d):%n%s", findBook.getName(), findBook.getId(), errorMessage));
+            }
+            booksList.remove(findBook);
+            System.out.printf("Livro \"%s\" (ID %d) deletado com sucesso.%n",
+                    findBook.getName(), findBook.getId());
+        } catch (NotFoundException |
+                 InvalidFieldException |
+                 IllegalDeletionException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+        }
+    }
+
+    private List<Loan> findActiveLoanByBookId(Integer id) throws InvalidFieldException {
+        if (id == null) {
+            throw new InvalidFieldException("É necessário fornecer um id de livro  valido para buscar emprestimos ativos correspondentes.");
+        }
+
+        return loanList.stream()
+                .filter(loan -> loan.getBook().getId() == id)
+                .filter(loan -> loan.getStatus() == LoanStatus.ACTIVE)
+                .toList();
     }
 }
 
