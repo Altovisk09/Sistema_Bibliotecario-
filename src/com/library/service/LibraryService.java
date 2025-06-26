@@ -112,9 +112,7 @@ public class LibraryService {
 
             System.out.println("Empréstimo registrado com sucesso para: " + user.getName());
 
-        } catch (InvalidFieldException |
-                 BookUnavailableException |
-                 UserNotEligibleForLoanException |
+        } catch (InvalidFieldException | BookUnavailableException | UserNotEligibleForLoanException |
                  UserLoanLimitException e) {
             System.out.println("[ERRO] " + e.getMessage());
         }
@@ -134,24 +132,30 @@ public class LibraryService {
             throw new InvalidFieldException("Campo Id deve ser preenchido");
         }
 
-        return usersList.stream()
-                .filter(user -> user.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Usuário não encontrado."));
+        return usersList.stream().filter(user -> user.getId() == id).findFirst().orElseThrow(() -> new NotFoundException("Usuário não encontrado."));
 
     }
 
+    public User findUserByIdSafe(Integer id) {
+        try {
+            if (id == null) {
+                throw new InvalidFieldException("Campo Id deve ser preenchido");
+            }
+
+            return usersList.stream().filter(user -> user.getId() == id).findFirst().orElseThrow(() -> new NotFoundException("Usuário não encontrado."));
+        } catch (InvalidFieldException | NotFoundException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+            return null;
+        }
+    }
+
     private List<Loan> activeLoansByUser(User user) {
-        return loanList.stream()
-                .filter(loan -> loan.getUser().equals(user) && loan.getStatus() == LoanStatus.ACTIVE)
-                .toList();
+        return loanList.stream().filter(loan -> loan.getUser().equals(user) && loan.getStatus() == LoanStatus.ACTIVE).toList();
     }
 
     private List<Loan> userLateReturns(User user) {
         List<Loan> userLoanList = activeLoansByUser(user);
-        return userLoanList.stream()
-                .filter(loan -> loan.getFinalDate().isBefore(LocalDate.now()))
-                .toList();
+        return userLoanList.stream().filter(loan -> loan.getFinalDate().isBefore(LocalDate.now())).toList();
     }
 
     private void overdueBooksValidation(User user) throws UserNotEligibleForLoanException {
@@ -159,9 +163,7 @@ public class LibraryService {
         if (lateReturnsList.isEmpty()) {
             return;
         }
-        String message = lateReturnsList.stream()
-                .map(loan -> String.format("%s (previsto: %s)", loan.getBook().getName(), loan.getFinalDate()))
-                .collect(Collectors.joining("\n"));
+        String message = lateReturnsList.stream().map(loan -> String.format("%s (previsto: %s)", loan.getBook().getName(), loan.getFinalDate())).collect(Collectors.joining("\n"));
 
         throw new UserNotEligibleForLoanException("Usuário: " + user.getName() + "possui" + lateReturnsList.size() + "\n" + message);
     }
@@ -192,8 +194,7 @@ public class LibraryService {
                 user.setUserType(type);
                 System.out.println("Tipo da conta alterada para: " + type.getDisplayName());
             }
-        } catch (NotFoundException
-                 | InvalidFieldException e) {
+        } catch (NotFoundException | InvalidFieldException e) {
             System.out.println(e.getMessage());
         }
     }
@@ -203,18 +204,13 @@ public class LibraryService {
             User findUser = findUserById(userId);
             List<Loan> activeLoans = activeLoansByUser(findUser);
             if (!activeLoans.isEmpty()) {
-                String loanListMessage = activeLoans.stream()
-                        .map(loan -> String.format("- \"%s\" (previsão de devolução: %s)",
-                                loan.getBook().getName(),
-                                loan.getFinalDate())).collect(Collectors.joining("\n"));
+                String loanListMessage = activeLoans.stream().map(loan -> String.format("- \"%s\" (previsão de devolução: %s)", loan.getBook().getName(), loan.getFinalDate())).collect(Collectors.joining("\n"));
                 throw new IllegalDeletionException("Usuário possui devoluções pendentes: \n" + loanListMessage);
             }
 
             usersList.remove(findUser);
             System.out.println("Usuário \"" + findUser.getName() + "\" removido com sucesso.");
-        } catch (NotFoundException |
-                 InvalidFieldException |
-                 IllegalDeletionException e) {
+        } catch (NotFoundException | InvalidFieldException | IllegalDeletionException e) {
             System.out.println("[ERRO]: " + e.getMessage());
         }
     }
