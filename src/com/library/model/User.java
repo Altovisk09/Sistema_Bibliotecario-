@@ -1,5 +1,6 @@
 package com.library.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,13 +8,11 @@ public class User {
     private final int id;
     private String name;
     private UserType userType;
-    private List<Loan> loanList;
 
     public User(int id, String name, UserType userType) {
         this.id = id;
         this.name = name;
         this.userType = userType;
-        this.loanList = new ArrayList<>();
     }
 
     public int getId() {
@@ -36,11 +35,7 @@ public class User {
         this.userType = userType;
     }
 
-    public List<Loan> getLoanList() {
-        return loanList;
-    }
-
-    public void setLoanList(List<Loan> loanList) {
-        this.loanList = loanList;
+    public String toString(){
+        return String.format("User:{Id: %d, Name:%s, Type: %s}", id, name, userType);
     }
 }
