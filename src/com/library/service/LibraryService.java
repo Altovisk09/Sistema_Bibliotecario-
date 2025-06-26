@@ -1,19 +1,23 @@
 package com.library.service;
 
 import com.library.exceptions.BookUnavailableException;
+import com.library.exceptions.InvalidFieldException;
+import com.library.exceptions.UserLoanLimitException;
+import com.library.exceptions.UserNotEligibleForLoanException;
 import com.library.model.*;
 import com.library.util.IdGenerator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class LibraryService {
     private List<Loan> loanList;
     private List<User> usersList;
     private List<Book> booksList;
 
-    public LibraryService(){
+    public LibraryService() {
         this.usersList = new ArrayList<>();
         this.booksList = new ArrayList<>();
         this.loanList = new ArrayList<>();
@@ -43,29 +47,134 @@ public class LibraryService {
         this.booksList = booksList;
     }
 
-    public void createUser(String name, UserType userType){
-        int newId = IdGenerator.getNextId(usersList, User::getId);
-        User newUser = new User(newId, name, userType);
-        usersList.add(newUser);
-    }
-    public void RegisterBook(String name, String autorName, BookCategory category, int totalCopies){
-        int newId = IdGenerator.getNextId(booksList, Book::getId);
-        Book newBook = new Book(newId, name, autorName, category, totalCopies);
-        booksList.add(newBook);
+    public void createUser(String name, UserType userType) {
+        try {
+            if (name == null || name.isBlank()) {
+                throw new InvalidFieldException("Nome de usuário não pode estar vazio.");
+            }
+            if (userType == null) {
+                throw new InvalidFieldException("Tipo de usuário não pode estar vazio.");
+            }
+            int newId = IdGenerator.getNextId(usersList, User::getId);
+            User newUser = new User(newId, name, userType);
+            usersList.add(newUser);
+            System.out.println("Usuário criado com sucesso: " + newUser);
+        } catch (InvalidFieldException e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
     }
 
-    public void RegisterLoan(User user, Book book){
-        try{
-            int newId = IdGenerator.getNextId(loanList,Loan::getId);
+    public void RegisterBook(String name, String autorName, BookCategory category, int totalCopies) {
+        try {
+            if (name == null || name.isBlank() || autorName == null || autorName.isBlank() || category == null) {
+                throw new InvalidFieldException("Informações básicas do livro não podem estar vazias.");
+            }
+            if (totalCopies <= 0) {
+                throw new InvalidFieldException("É necessário ao menos uma unidade do livro para realizar o cadastro");
+            }
+            //metodo para validar se o livro já existe
+
+            int newId = IdGenerator.getNextId(booksList, Book::getId);
+            Book newBook = new Book(newId, name, autorName, category, totalCopies);
+            booksList.add(newBook);
+            System.out.println("Livro \"" + newBook.getName() + "\" cadastrado com sucesso.");
+
+        } catch (InvalidFieldException e) {
+            System.out.println("[ERROR] " + e.getMessage());
+        }
+    }
+
+    public void RegisterLoan(User user, Book book) {
+        try {
+            if (user == null) {
+                throw new InvalidFieldException("Usuário não pode ser nulo.");
+            }
+
+            if (user.getUserType() == null) {
+                throw new InvalidFieldException("Tipo de usuário não definido.");
+            }
+
+            if (book == null) {
+                throw new InvalidFieldException("Livro não pode ser nulo.");
+            }
+            //Verifica se o limite de livros emprestados foi atingido e se a alguma devolução pendente
+            List<Loan> userLoanList = activeLoansByUser(user);
+            overdueBooksValidation(user);
+            checkLoanLimit(userLoanList, user);
+
+            int newId = IdGenerator.getNextId(loanList, Loan::getId);
             int borrowedDays = user.getUserType().getBorrowedDays();
             LocalDate startDate = LocalDate.now();
             LocalDate finalDate = startDate.plusDays(borrowedDays);
             LoanStatus status = LoanStatus.ACTIVE;
+
+            book.lendBook();
+
             Loan newLoan = new Loan(newId, user, book, startDate, finalDate, status);
             loanList.add(newLoan);
-            book.lendBook();
-        } catch (BookUnavailableException e) {
-            System.out.println(e.getMessage());
+
+            System.out.println("Empréstimo registrado com sucesso para: " + user.getName());
+
+        } catch (InvalidFieldException |
+                 BookUnavailableException |
+                 UserNotEligibleForLoanException |
+                 UserLoanLimitException e) {
+            System.out.println("[ERRO] " + e.getMessage());
+        }
+    }
+
+    public void listUsers() {
+        if (!usersList.isEmpty()) {
+            for (User user : usersList) {
+                System.out.println(user);
+            }
+        }
+        System.out.println("Sem usuários cadastrados");
+    }
+
+    public void searchUserById(int id) {
+        User findUser = usersList.stream()
+                .filter(user -> user.getId() == id)
+                .findFirst()
+                .orElse(null);
+        if (findUser != null) {
+            System.out.println(findUser);
+        } else {
+            System.out.println("Usuário não encontrado");
+        }
+    }
+
+    private List<Loan> activeLoansByUser(User user) {
+        return loanList.stream()
+                .filter(loan -> loan.getUser().equals(user) && loan.getStatus() == LoanStatus.ACTIVE)
+                .toList();
+    }
+
+    private List<Loan> userLateReturns(User user) {
+        List<Loan> userLoanList = activeLoansByUser(user);
+        return userLoanList.stream()
+                .filter(loan -> loan.getFinalDate().isBefore(LocalDate.now()))
+                .toList();
+    }
+
+    private void overdueBooksValidation(User user) throws UserNotEligibleForLoanException {
+        List<Loan> lateReturnsList = userLateReturns(user);
+        if (lateReturnsList.isEmpty()) {
+            return;
+        }
+        String message = lateReturnsList.stream()
+                .map(loan -> String.format("%s (previsto: %s)", loan.getBook().getName(), loan.getFinalDate()))
+                .collect(Collectors.joining("\n"));
+
+        throw new UserNotEligibleForLoanException(message);
+    }
+
+    private void checkLoanLimit(List<Loan> list, User user) throws UserLoanLimitException {
+        int loanLimit = user.getUserType().getLoanLimit();
+        int currentLoanActive = list.size();
+
+        if (loanLimit >= currentLoanActive) {
+            throw new UserLoanLimitException("Limite de %d empréstimos simultaneos foi atingido, devolva algum dos livros em sua posse para pegar outro.");
         }
     }
 }

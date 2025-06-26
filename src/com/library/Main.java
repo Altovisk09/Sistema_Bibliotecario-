@@ -9,5 +9,6 @@ public class Main {
         service.createUser("Eric", UserType.TEACHER);
         service.createUser("Eric", UserType.STUDENT_GRADUATION);
         service.createUser("Eric", UserType.STUDENT_POSTGRADUATION);
+        service.listUsers();
     }
 }
