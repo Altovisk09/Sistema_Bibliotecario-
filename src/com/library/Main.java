@@ -38,6 +38,7 @@ public class Main {
         service.RegisterLoan(carlos, book1984);
 
         // TESTAR DEVOLUÇÃO
-        //service.returnBooksByUserInteractive();
+        service.returnBooksByUserInteractive();
+        //Funcionou :D
     }
 }
