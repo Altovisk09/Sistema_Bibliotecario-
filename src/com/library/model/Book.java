@@ -69,4 +69,18 @@ public class Book {
         }
         setAvailableCopies(getAvailableCopies() - 1);
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Livro {ID: %d, Título: \"%s\", Autor: %s, Categoria: %s, Cópias: %d (Disponíveis: %d)}",
+                id,
+                name,
+                autorName,
+                category.getName(),
+                totalCopies,
+                availableCopies
+        );
+    }
+
 }

@@ -54,5 +54,20 @@ public class Loan {
         this.finalDate = finalDate;
         this.status = status;
     }
+    @Override
+    public String toString() {
+        return String.format(
+                "Empréstimo ID: %d%n" +
+                        "- Usuário: %s (ID %d)%n" +
+                        "- Livro: \"%s\" (ID %d)%n" +
+                        "- Início: %s | Devolução prevista: %s%n" +
+                        "- Status: %s%n",
+                id,
+                user.getName(), user.getId(),
+                book.getName(), book.getId(),
+                startDate, finalDate,
+                status
+        );
+    }
 
 }

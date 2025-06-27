@@ -316,6 +316,44 @@ public class LibraryService {
                 .filter(loan -> loan.getStatus() == LoanStatus.ACTIVE)
                 .toList();
     }
+    public void showAllBooks(){
+        if(booksList.isEmpty()){
+            System.out.println("No momento, não há livros...");
+            return;
+        }
+        System.out.println("📚 Catálogo de Livros:");
+        booksList.forEach(System.out::println);
+    }
+    public void showAllUsers() {
+        if (usersList.isEmpty()) {
+            System.out.println("Nenhum usuário cadastrado no momento.");
+            return;
+        }
+
+        System.out.println("👥 Lista de Usuários Cadastrados:");
+        usersList.forEach(System.out::println);
+    }
+    public void showAllLoans() {
+        if (loanList.isEmpty()) {
+            System.out.println("Não há registros de empréstimos no sistema.");
+            return;
+        }
+
+        System.out.println("📄 Lista de Empréstimos Registrados:");
+        loanList.forEach(System.out::println);
+    }
+
+    public void showBookById(Integer id) {
+        try {
+            Book book = findBookById(id);
+            System.out.println("📖 Livro encontrado:");
+            System.out.println(book);
+        } catch (InvalidFieldException | NotFoundException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+        }
+    }
+
+
 }
 
 
