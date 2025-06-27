@@ -153,7 +153,7 @@ public class LibraryService {
     }
 
     private List<Loan> activeLoansByUser(User user) {
-        return loanList.stream().filter(loan -> loan.getUser().equals(user) && loan.getStatus() == LoanStatus.ACTIVE).toList();
+        return loanList.stream().filter(loan -> loan.getUser().equals(user) && loan.getStatus() == LoanStatus.ACTIVE || loan.getStatus() == LoanStatus.LATE).toList();
     }
 
     private List<Loan> userLateReturns(User user) {
