@@ -7,12 +7,14 @@ import com.library.util.IdGenerator;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
 public class LibraryService {
     private List<Loan> loanList;
     private List<User> usersList;
     private List<Book> booksList;
+    private final Scanner scanner = new Scanner(System.in);
 
     public LibraryService() {
         this.usersList = new ArrayList<>();
@@ -352,7 +354,57 @@ public class LibraryService {
             System.out.println("[ERROR]: " + e.getMessage());
         }
     }
+    public User searchUserByNameInteractive() {
+        while (true) {
+            System.out.print("Digite o nome (ou parte do nome) do usuário para buscar (ou 0 para sair): ");
+            String inputName = scanner.nextLine().trim();
 
+            if (inputName.equals("0")) {
+                System.out.println("Pesquisa de usuário encerrada.");
+                return null;
+            }
+
+            String lowerName = inputName.toLowerCase();
+            List<User> matchedUsers = usersList.stream()
+                    .filter(user -> user.getName().toLowerCase().contains(lowerName))
+                    .collect(Collectors.toList());
+
+            if (matchedUsers.isEmpty()) {
+                System.out.println("Nenhum usuário encontrado com esse nome.");
+                continue; // pede nome novamente
+            }
+
+            System.out.println("Usuários encontrados:");
+            matchedUsers.forEach(user -> System.out.printf("ID: %d - Nome: %s%n", user.getId(), user.getName()));
+
+            while (true) {
+                System.out.print("Digite o ID do usuário desejado (ou 0 para sair): ");
+                String inputIdStr = scanner.nextLine().trim();
+
+                if (inputIdStr.equals("0")) {
+                    System.out.println("Pesquisa de usuário encerrada.");
+                    return null;
+                }
+
+                try {
+                    int inputId = Integer.parseInt(inputIdStr);
+                    User selectedUser = matchedUsers.stream()
+                            .filter(user -> user.getId() == inputId)
+                            .findFirst()
+                            .orElse(null);
+
+                    if (selectedUser != null) {
+                        System.out.println("Usuário selecionado: " + selectedUser);
+                        return selectedUser;
+                    } else {
+                        System.out.println("ID inválido. Digite um ID que apareça na lista.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Digite um número válido para o ID.");
+                }
+            }
+        }
+    }
 
 }
 
