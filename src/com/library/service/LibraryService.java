@@ -175,7 +175,7 @@ public class LibraryService {
         int loanLimit = user.getUserType().getLoanLimit();
         int currentLoanActive = list.size();
 
-        if (loanLimit >= currentLoanActive) {
+        if (loanLimit <= currentLoanActive) {
             throw new UserLoanLimitException("Limite de %d empréstimos simultaneos foi atingido, devolva algum dos livros em sua posse para pegar outro.");
         }
     }
