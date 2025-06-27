@@ -531,8 +531,81 @@ public class LibraryService {
             System.out.println("[ERROR]: " + e.getMessage());
         }
     }
+    public void borrowBooksInteractive() {
+        try {
+            User user = searchUserByNameInteractive();
+            if (user == null) return;
 
+            user = findUserById(user.getId()); // Garante existência
+
+            List<Loan> activeLoans = activeLoansByUser(user);
+            overdueBooksValidation(user); // bloqueia se tiver livros atrasados
+            int remainingLoans = user.getUserType().getLoanLimit() - activeLoans.size();
+
+            if (remainingLoans <= 0) {
+                System.out.printf("[AVISO] Usuário já atingiu o limite de %d empréstimos simultâneos.%n",
+                        user.getUserType().getLoanLimit());
+                return;
+            }
+
+            while (remainingLoans > 0) {
+                // Exibir livros disponíveis
+                List<Book> availableBooks = booksList.stream()
+                        .filter(book -> book.getAvailableCopies() > 0)
+                        .toList();
+
+                if (availableBooks.isEmpty()) {
+                    System.out.println("Nenhum livro disponível no momento.");
+                    return;
+                }
+
+                System.out.println("📚 Livros disponíveis:");
+                availableBooks.forEach(book -> System.out.printf(
+                        "ID: %d | %s | Autor: %s | Categoria: %s%n",
+                        book.getId(),
+                        book.getName(),
+                        book.getAutorName(),
+                        book.getCategory().getName()
+                ));
+
+                System.out.print("Digite o ID do livro que deseja pegar emprestado (ou 0 para sair): ");
+                String inputIdStr = scanner.nextLine().trim();
+                if (inputIdStr.equals("0")) {
+                    System.out.println("Empréstimo encerrado.");
+                    return;
+                }
+
+                try {
+                    int bookId = Integer.parseInt(inputIdStr);
+                    Book selectedBook = findBookById(bookId);
+
+                    RegisterLoan(user, selectedBook);
+                    remainingLoans--;
+
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Digite um número válido para o ID.");
+                } catch (Exception e) {
+                    System.out.println("[ERRO]: " + e.getMessage());
+                }
+
+                if (remainingLoans == 0) {
+                    System.out.println("📚 Você atingiu o limite de empréstimos permitidos.");
+                    return;
+                }
+
+                System.out.print("Deseja pegar mais um livro emprestado? (s/n): ");
+                String answer = scanner.nextLine().trim().toLowerCase();
+                if (!answer.equals("s")) {
+                    break;
+                }
+            }
+
+        } catch (InvalidFieldException | NotFoundException | UserNotEligibleForLoanException e) {
+            System.out.println("[ERRO]: " + e.getMessage());
+        }
+    }
 }
+
 
 
 
