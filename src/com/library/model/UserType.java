@@ -7,7 +7,7 @@ public enum UserType {
 
     private final int borrowedDays;
     private final int loanLimit;
-    private String displayName;
+    private final String displayName;
 
     UserType(int borrowedDays, int loanLimit, String displayName){
         this.borrowedDays = borrowedDays;

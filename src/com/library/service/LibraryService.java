@@ -130,6 +130,16 @@ public class LibraryService {
         }
     }
 
+    public void listBooks() {
+        if (!booksList.isEmpty()) {
+            for (Book book : booksList) {
+                System.out.println(book);
+            }
+        } else {
+            System.out.println("Sem usuários cadastrados");
+        }
+    }
+
     public User findUserById(Integer id) throws NotFoundException, InvalidFieldException {
         if (id == null) {
             throw new InvalidFieldException("Campo Id deve ser preenchido");
