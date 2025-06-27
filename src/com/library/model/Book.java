@@ -54,7 +54,7 @@ public class Book {
         this.availableCopies = availableCopies;
     }
 
-    public Book(int id, String name, String autorName, BookCategory category, int totalCopies){
+    public Book(int id, String name, String autorName, BookCategory category, int totalCopies) {
         this.id = id;
         this.name = name;
         this.autorName = autorName;
@@ -83,4 +83,9 @@ public class Book {
         );
     }
 
+    public void returnBook() {
+        if (availableCopies < totalCopies) {
+            availableCopies++;
+        }
+    }
 }
