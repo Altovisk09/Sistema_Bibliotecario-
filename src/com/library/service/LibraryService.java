@@ -456,6 +456,82 @@ public class LibraryService {
             }
         }
     }
+    public void returnBooksByUserInteractive() {
+        try {
+            // Passo 1: Buscar usuário por nome
+            User user = searchUserByNameInteractive();
+            if (user == null) return;
+
+            // Passo 2: Garantir que o usuário existe via ID
+            user = findUserById(user.getId()); // garante NotFoundException se inválido
+
+            while (true) {
+                // Passo 3: Buscar empréstimos ativos
+                List<Loan> activeLoans = activeLoansByUser(user);
+
+                if (activeLoans.isEmpty()) {
+                    System.out.println("O usuário \"" + user.getName() + "\" não possui empréstimos ativos.");
+                    return;
+                }
+
+                // Exibir empréstimos ativos
+                System.out.println("📚 Empréstimos ativos para o usuário \"" + user.getName() + "\":");
+                activeLoans.forEach(loan -> System.out.printf(
+                        "ID: %d | Livro: %s | Previsão: %s | Status: %s%n",
+                        loan.getId(),
+                        loan.getBook().getName(),
+                        loan.getFinalDate(),
+                        loan.getFinalDate().isBefore(LocalDate.now()) ? "🔴 ATRASADO" : "🟢 No prazo"
+                ));
+
+                // Passo 4: Solicitar ID do empréstimo para devolução
+                System.out.print("Digite o ID do empréstimo que deseja devolver (ou 0 para sair): ");
+                String inputIdStr = scanner.nextLine().trim();
+
+                if (inputIdStr.equals("0")) {
+                    System.out.println("Devolução encerrada.");
+                    return;
+                }
+
+                int inputId;
+                try {
+                    inputId = Integer.parseInt(inputIdStr);
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Digite um número de ID válido.");
+                    continue;
+                }
+
+                Loan selectedLoan = activeLoans.stream()
+                        .filter(loan -> loan.getId() == inputId)
+                        .findFirst()
+                        .orElse(null);
+
+                if (selectedLoan == null) {
+                    System.out.println("ID inválido. Escolha um empréstimo da lista.");
+                    continue;
+                }
+
+                // Passo 5: Atualizar status e livro
+                selectedLoan.setStatus(LoanStatus.RETURNED);
+                selectedLoan.getBook().returnBook();
+
+                System.out.println("✅ Livro \"" + selectedLoan.getBook().getName() +
+                        "\" devolvido com sucesso para a biblioteca!");
+
+                // Perguntar se deseja devolver mais algum
+                System.out.print("Deseja devolver outro livro para este usuário? (s/n): ");
+                String answer = scanner.nextLine().trim().toLowerCase();
+                if (!answer.equals("s")) {
+                    System.out.println("Encerrando devoluções para este usuário.");
+                    return;
+                }
+            }
+
+        } catch (InvalidFieldException | NotFoundException e) {
+            System.out.println("[ERROR]: " + e.getMessage());
+        }
+    }
+
 }
 
 
