@@ -367,7 +367,7 @@ public class LibraryService {
             String lowerName = inputName.toLowerCase();
             List<User> matchedUsers = usersList.stream()
                     .filter(user -> user.getName().toLowerCase().contains(lowerName))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (matchedUsers.isEmpty()) {
                 System.out.println("Nenhum usuário encontrado com esse nome.");
@@ -405,7 +405,57 @@ public class LibraryService {
             }
         }
     }
+    public Book searchBookByNameInteractive() {
+        while (true) {
+            System.out.print("Digite o nome (ou parte do nome) do livro para buscar (ou 0 para sair): ");
+            String inputName = scanner.nextLine().trim();
 
+            if (inputName.equals("0")) {
+                System.out.println("Pesquisa de livro encerrada.");
+                return null;
+            }
+
+            String lowerName = inputName.toLowerCase();
+            List<Book> matchedBooks = booksList.stream()
+                    .filter(book -> book.getName().toLowerCase().contains(lowerName))
+                    .toList();
+
+            if (matchedBooks.isEmpty()) {
+                System.out.println("Nenhum livro encontrado com esse nome.");
+                continue; // pede nome novamente
+            }
+
+            System.out.println("Livros encontrados:");
+            matchedBooks.forEach(book -> System.out.printf("ID: %d - Nome: %s%n", book.getId(), book.getName()));
+
+            while (true) {
+                System.out.print("Digite o ID do livro desejado (ou 0 para sair): ");
+                String inputIdStr = scanner.nextLine().trim();
+
+                if (inputIdStr.equals("0")) {
+                    System.out.println("Pesquisa de livro encerrada.");
+                    return null;
+                }
+
+                try {
+                    int inputId = Integer.parseInt(inputIdStr);
+                    Book selectedBook = matchedBooks.stream()
+                            .filter(book -> book.getId() == inputId)
+                            .findFirst()
+                            .orElse(null);
+
+                    if (selectedBook != null) {
+                        System.out.println("Livro selecionado: " + selectedBook);
+                        return selectedBook;
+                    } else {
+                        System.out.println("ID inválido. Digite um ID que apareça na lista.");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Entrada inválida. Digite um número válido para o ID.");
+                }
+            }
+        }
+    }
 }
 
 
