@@ -63,7 +63,7 @@ public class LibraryService {
         }
     }
 
-    public void RegisterBook(String name, String autorName, BookCategory category, int totalCopies) {
+    public void registerBook(String name, String autorName, BookCategory category, int totalCopies) {
         try {
             if (name == null || name.isBlank() || autorName == null || autorName.isBlank() || category == null) {
                 throw new InvalidFieldException("Informações básicas do livro não podem estar vazias.");
@@ -83,7 +83,7 @@ public class LibraryService {
         }
     }
 
-    public void RegisterLoan(User user, Book book) {
+    public void registerLoan(User user, Book book) {
         try {
             if (user == null) {
                 throw new InvalidFieldException("Usuário não pode ser nulo.");
@@ -579,7 +579,7 @@ public class LibraryService {
                     int bookId = Integer.parseInt(inputIdStr);
                     Book selectedBook = findBookById(bookId);
 
-                    RegisterLoan(user, selectedBook);
+                    registerLoan(user, selectedBook);
                     remainingLoans--;
 
                 } catch (NumberFormatException e) {
