@@ -24,7 +24,7 @@ public enum BookCategory {
         return description;
     }
 
-    public String getName(){
+    public String getDisplayName(){
         return name;
     }
 

@@ -1,33 +1,50 @@
 package com.library.model;
 
-import com.library.exceptions.BookUnavailableException;
+import jakarta.persistence.*;
 
+@Entity
 public class Book {
-    private long id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
-    private String autorName;
+    private String authorName;
+
+    @Enumerated(EnumType.STRING)
     private BookCategory category;
+
     private int totalCopies;
     private int availableCopies;
 
-    public String getName() {
-        return name;
+    protected Book() {}
+
+    public Book(String name, String authorName, BookCategory category, int totalCopies) {
+        this.name = name;
+        this.authorName = authorName;
+        this.category = category;
+        this.totalCopies = totalCopies;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getAutorName() {
-        return autorName;
+    public String getAuthorName() {
+        return authorName;
     }
 
-    public void setAutorName(String autorName) {
-        this.autorName = autorName;
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
     }
 
     public BookCategory getCategory() {
@@ -54,38 +71,16 @@ public class Book {
         this.availableCopies = availableCopies;
     }
 
-    public Book(int id, String name, String autorName, BookCategory category, int totalCopies) {
-        this.id = id;
-        this.name = name;
-        this.autorName = autorName;
-        this.category = category;
-        this.totalCopies = totalCopies;
-        this.availableCopies = totalCopies;
-    }
-
-    public void lendBook() throws BookUnavailableException {
-        if (getAvailableCopies() <= 0) {
-            throw new BookUnavailableException("Quantidade disponível do livro '" + getName() + "' insuficiente.");
-        }
-        setAvailableCopies(getAvailableCopies() - 1);
-    }
-
     @Override
     public String toString() {
         return String.format(
                 "Livro {ID: %d, Título: \"%s\", Autor: %s, Categoria: %s, Cópias: %d (Disponíveis: %d)}",
                 id,
                 name,
-                autorName,
-                category.getName(),
+                authorName,
+                category.getDisplayName(),
                 totalCopies,
                 availableCopies
         );
-    }
-
-    public void returnBook() {
-        if (availableCopies < totalCopies) {
-            availableCopies++;
-        }
     }
 }

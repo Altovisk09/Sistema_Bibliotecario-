@@ -1,21 +1,29 @@
 package com.library.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 public class User {
-    private final int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String name;
+
+    @Enumerated(EnumType.STRING)
     private UserType userType;
 
-    public User(int id, String name, UserType userType) {
-        this.id = id;
+    public User(String name, UserType userType) {
         this.name = name;
         this.userType = userType;
     }
+    protected User(){}
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -38,4 +46,5 @@ public class User {
     public String toString(){
         return String.format("User:{Id: %d, Name:%s, Type: %s}", id, name, userType);
     }
+
 }

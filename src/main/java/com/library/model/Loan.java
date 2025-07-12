@@ -1,16 +1,28 @@
 package com.library.model;
 
-import java.time.LocalDate;
+import jakarta.annotation.Generated;
+import jakarta.persistence.*;
 
+import java.time.LocalDate;
+@Entity
 public class Loan {
-    private final int id;
-    private final Book book;
-    private final User user;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    private Book book;
+
+    @ManyToOne(optional = false)
+    private User user;
+
     private LocalDate startDate;
     private LocalDate finalDate;
+
+    @Enumerated(EnumType.STRING)
     private LoanStatus status;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -46,14 +58,6 @@ public class Loan {
         this.status = status;
     }
 
-    public Loan(int id, User user, Book book, LocalDate inicialDate, LocalDate finalDate, LoanStatus status){
-        this.id = id;
-        this.user = user;
-        this.book = book;
-        this.startDate = inicialDate;
-        this.finalDate = finalDate;
-        this.status = status;
-    }
     @Override
     public String toString() {
         return String.format(
@@ -68,6 +72,17 @@ public class Loan {
                 startDate, finalDate,
                 status
         );
+    }
+    protected Loan(){
+
+    }
+
+    public Loan(User user, Book book, LocalDate inicialDate, LocalDate finalDate, LoanStatus status){
+        this.user = user;
+        this.book = book;
+        this.startDate = inicialDate;
+        this.finalDate = finalDate;
+        this.status = status;
     }
 
 }
