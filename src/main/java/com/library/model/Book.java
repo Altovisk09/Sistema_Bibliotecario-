@@ -3,6 +3,7 @@ package com.library.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "book_table")
 public class Book {
 
     @Id
