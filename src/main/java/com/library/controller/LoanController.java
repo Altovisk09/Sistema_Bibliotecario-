@@ -1,4 +1,4 @@
-package com.library.config;
+package com.library.controller;
 
 public class LoanController {
 }
