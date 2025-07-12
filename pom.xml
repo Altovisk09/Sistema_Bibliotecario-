@@ -12,7 +12,7 @@
 	<artifactId>spring-library</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>spring-library</name>
-	<description>API REST de gerenciamento de livros usando Spring Boot, estruturada com camadas (Controller, Service, Repository, DTO, Entity), persistência com PostgreSQL via Spring Data JPA e validação com Bean Validation.</description>
+	<description>API REST de gestão de livros usando Spring Boot, estruturada com camadas (Controller, Service, Repository, DTO, Entity), persistência com PostgresSQL via Spring Data JPA e validação com Bean Validation.</description>
 	<url/>
 	<licenses>
 		<license/>
