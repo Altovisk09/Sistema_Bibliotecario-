@@ -2,10 +2,6 @@ package com.library.model;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "user_table")
 public class User {
@@ -22,7 +18,7 @@ public class User {
         this.name = name;
         this.userType = userType;
     }
-    protected User(){}
+    public User(){}
 
     public Long getId() {
         return id;

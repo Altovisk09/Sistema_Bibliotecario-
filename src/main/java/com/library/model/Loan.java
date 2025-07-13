@@ -74,7 +74,7 @@ public class Loan {
                 status
         );
     }
-    protected Loan(){
+    public Loan(){
 
     }
 

@@ -19,7 +19,7 @@ public class Book {
     private int totalCopies;
     private int availableCopies;
 
-    protected Book() {}
+    public Book() {}
 
     public Book(String name, String authorName, BookCategory category, int totalCopies) {
         this.name = name;
