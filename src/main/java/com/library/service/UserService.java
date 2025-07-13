@@ -66,6 +66,7 @@ public class UserService {
 
         repository.delete(user);
     }
+
     public List<UserDTO> listAllUsers(){
        return repository.findAll().stream()
                .map(UserDTO::new)
