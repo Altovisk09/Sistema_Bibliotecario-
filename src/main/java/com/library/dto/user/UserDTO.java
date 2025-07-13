@@ -17,4 +17,6 @@ public class UserDTO {
         this.name = user.getName();
         this.userType = user.getUserType();
     }
+
+    public UserDTO(){}
 }
