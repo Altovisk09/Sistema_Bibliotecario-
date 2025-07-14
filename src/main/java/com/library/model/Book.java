@@ -1,11 +1,14 @@
 package com.library.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "book_table")
 public class Book {
-
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,57 +22,14 @@ public class Book {
     private int totalCopies;
     private int availableCopies;
 
-    public Book() {}
+    public Book() {
+    }
 
     public Book(String name, String authorName, BookCategory category, int totalCopies) {
         this.name = name;
         this.authorName = authorName;
         this.category = category;
         this.totalCopies = totalCopies;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAuthorName() {
-        return authorName;
-    }
-
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
-    }
-
-    public BookCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(BookCategory category) {
-        this.category = category;
-    }
-
-    public int getTotalCopies() {
-        return totalCopies;
-    }
-
-    public void setTotalCopies(int totalCopies) {
-        this.totalCopies = totalCopies;
-    }
-
-    public int getAvailableCopies() {
-        return availableCopies;
-    }
-
-    public void setAvailableCopies(int availableCopies) {
-        this.availableCopies = availableCopies;
     }
 
     @Override
