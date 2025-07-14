@@ -5,13 +5,11 @@ import com.library.dto.user.UpdateUserDTO;
 import com.library.dto.user.UserDTO;
 import com.library.exceptions.NotFoundException;
 import com.library.model.User;
-import com.library.model.UserType;
 import com.library.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
