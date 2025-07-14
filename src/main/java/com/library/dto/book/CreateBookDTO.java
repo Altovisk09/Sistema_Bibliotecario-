@@ -15,11 +15,14 @@ public class CreateBookDTO {
     private String authorName;
     @NotNull
     private BookCategory category;
+    @NotNull
+    private Integer totalCopies;
 
-    public CreateBookDTO(String name, String authorName, BookCategory category){
+    public CreateBookDTO(String name, String authorName, BookCategory category, Integer totalCopies){
         this.name = name;
         this.authorName = authorName;
         this.category = category;
+        this.totalCopies = totalCopies;
     }
 
     public CreateBookDTO(){}
