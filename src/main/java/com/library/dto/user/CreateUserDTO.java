@@ -9,9 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateUserDTO {
-    @NotBlank
+    @NotBlank(message = "O nome de usuário é obrigatório")
     private String name;
-    @NotNull
+    @NotNull(message = "Tipo de usuário é obrigatório")
     private UserType userType;
 
     public CreateUserDTO(String name, UserType userType) {

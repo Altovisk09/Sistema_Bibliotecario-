@@ -3,18 +3,15 @@ package com.library.controller;
 import com.library.dto.book.BookDTO;
 import com.library.dto.book.CreateBookDTO;
 import com.library.dto.book.UpdateBookDTO;
-import com.library.model.Book;
 import com.library.service.BookService;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/books")
 public class BookController {
 
     private final BookService service;
@@ -24,7 +21,7 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<BookDTO> createBook(@RequestBody @Valid CreateBookDTO dto){
+    public ResponseEntity<BookDTO> createBook(@Valid @RequestBody CreateBookDTO dto){
         BookDTO book = service.createBook(dto);
         return ResponseEntity.status(201).body(book);
     }
@@ -42,7 +39,7 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> findUserById(@PathVariable Long id){
+    public ResponseEntity<BookDTO> findBookById(@PathVariable Long id){
         BookDTO book = service.findBookById(id);
         return ResponseEntity.status(200).body(book);
     }
@@ -50,7 +47,6 @@ public class BookController {
     @GetMapping
     public ResponseEntity<List<BookDTO>> getAllBooks() {
         List<BookDTO> books = service.listAllBooks();
-        return ResponseEntity.ok(books);
+        return ResponseEntity.status(200).body(books);
     }
-
 }
