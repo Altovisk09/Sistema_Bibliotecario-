@@ -10,6 +10,8 @@ import com.library.model.User;
 import com.library.repository.LoanRepository;
 import com.library.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +19,11 @@ import java.util.List;
 @Service
 public class LoanService {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoanService.class);
+
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
-    private final BookService bookService;  // usa serviço, não repo diretamente
+    private final BookService bookService;
 
     public LoanService(LoanRepository loanRepository,
                        UserRepository userRepository,
@@ -32,12 +36,20 @@ public class LoanService {
     @Transactional
     public LoanDTO createLoan(CreateLoanDTO dto) {
         User user = userRepository.findById(dto.getUserId())
-                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+                .orElseThrow(() -> {
+                    logger.error("Usuário não encontrado: userId={}", dto.getUserId());
+                    return new NotFoundException("Usuário não encontrado");
+                });
 
         Book book = bookService.getBookOrThrow(dto.getBookId());
 
         // Verifica cópias disponíveis
-        bookService.decrementAvailableCopies(book.getId());
+        try {
+            bookService.decrementAvailableCopies(book.getId());
+        } catch (Exception e) {
+            logger.error("Falha ao decrementar cópias do livro: bookId={}, erro={}", book.getId(), e.getMessage());
+            throw e;
+        }
 
         Loan loan = new Loan();
         loan.setUser(user);
@@ -61,7 +73,10 @@ public class LoanService {
 
         if (dto.getUserId() != null) {
             User user = userRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
+                    .orElseThrow(() -> {
+                        logger.error("Usuário não encontrado ao atualizar empréstimo: userId={}", dto.getUserId());
+                        return new NotFoundException("Usuário não encontrado");
+                    });
             loan.setUser(user);
         }
 
@@ -69,9 +84,14 @@ public class LoanService {
             Book oldBook = loan.getBook();
             Book newBook = bookService.getBookOrThrow(dto.getBookId());
 
-            // Ajusta cópias disponíveis
-            bookService.incrementAvailableCopies(oldBook.getId());
-            bookService.decrementAvailableCopies(newBook.getId());
+            try {
+                bookService.incrementAvailableCopies(oldBook.getId());
+                bookService.decrementAvailableCopies(newBook.getId());
+            } catch (Exception e) {
+                logger.error("Falha ao atualizar livro do empréstimo: oldBookId={}, newBookId={}, erro={}",
+                        oldBook.getId(), newBook.getId(), e.getMessage());
+                throw e;
+            }
 
             loan.setBook(newBook);
         }
@@ -95,7 +115,15 @@ public class LoanService {
     @Transactional
     public void deleteLoan(Long id) {
         Loan loan = getLoanOrThrow(id);
-        bookService.incrementAvailableCopies(loan.getBook().getId());
+
+        try {
+            bookService.incrementAvailableCopies(loan.getBook().getId());
+        } catch (Exception e) {
+            logger.error("Falha ao incrementar cópias do livro ao deletar empréstimo: bookId={}, erro={}",
+                    loan.getBook().getId(), e.getMessage());
+            throw e;
+        }
+
         loanRepository.delete(loan);
     }
 
@@ -107,7 +135,9 @@ public class LoanService {
 
     private Loan getLoanOrThrow(Long id) {
         return loanRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Empréstimo não encontrado com id: " + id));
+                .orElseThrow(() -> {
+                    logger.error("Empréstimo não encontrado: loanId={}", id);
+                    return new NotFoundException("Empréstimo não encontrado com id: " + id);
+                });
     }
 }
-

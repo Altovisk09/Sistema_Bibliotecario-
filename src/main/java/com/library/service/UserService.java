@@ -7,67 +7,83 @@ import com.library.exceptions.NotFoundException;
 import com.library.model.User;
 import com.library.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class UserService {
-   private final UserRepository repository;
 
-   public UserService(UserRepository repository){
-       this.repository = repository;
-   }
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-   @Transactional
-   public UserDTO createUser(CreateUserDTO dto){
-       User user = new User();
-       user.setName(dto.getName());
-       user.setUserType(dto.getUserType());
+    private final UserRepository repository;
 
-       user = repository.save(user);
+    public UserService(UserRepository repository){
+        this.repository = repository;
+    }
 
-       return new UserDTO(user);
-   }
-
-   public UserDTO findUserById(Long id){
-      User user = repository.findById(id)
-              .orElseThrow(()-> new NotFoundException(String.format("Usuário com o id %d não encontrado", id)));
-    return new UserDTO(user);
-   }
-// Função dinamica, atualiza todos ou apenas os dados que forem recebidos na requisição.
     @Transactional
-   public UserDTO updateUserById(Long id, UpdateUserDTO dto){
-       User user = repository.findById(id)
-               .orElseThrow(()-> new NotFoundException(String.format("Usuário com o id %d não encontrado", id)));
+    public UserDTO createUser(CreateUserDTO dto){
+        User user = new User();
+        user.setName(dto.getName());
+        user.setUserType(dto.getUserType());
 
-       if ((dto.getName() == null || dto.getName().isBlank()) && dto.getUserType() == null) {
-           throw new IllegalArgumentException("Pelo menos um campo deve ser informado para atualização.");
-       }
+        user = repository.save(user);
 
-       if(dto.getName() != null && !dto.getName().isBlank()){
-           user.setName(dto.getName());
-       }
+        return new UserDTO(user);
+    }
 
-       if(dto.getUserType() != null){
-           user.setUserType(dto.getUserType());
-       }
+    public UserDTO findUserById(Long id){
+        User user = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Usuário não encontrado: userId={}", id);
+                    return new NotFoundException(String.format("Usuário com o id %d não encontrado", id));
+                });
+        return new UserDTO(user);
+    }
 
-       repository.save(user);
+    // Função dinamica, atualiza todos ou apenas os dados que forem recebidos na requisição.
+    @Transactional
+    public UserDTO updateUserById(Long id, UpdateUserDTO dto){
+        User user = repository.findById(id)
+                .orElseThrow(() -> {
+                    logger.error("Usuário não encontrado ao atualizar: userId={}", id);
+                    return new NotFoundException(String.format("Usuário com o id %d não encontrado", id));
+                });
 
-       return new UserDTO(user);
-   }
+        if ((dto.getName() == null || dto.getName().isBlank()) && dto.getUserType() == null) {
+            logger.error("Tentativa de atualizar usuário sem campos válidos: userId={}", id);
+            throw new IllegalArgumentException("Pelo menos um campo deve ser informado para atualização.");
+        }
+
+        if(dto.getName() != null && !dto.getName().isBlank()){
+            user.setName(dto.getName());
+        }
+
+        if(dto.getUserType() != null){
+            user.setUserType(dto.getUserType());
+        }
+
+        repository.save(user);
+        return new UserDTO(user);
+    }
+
     @Transactional
     public void deleteUserById(Long id) {
         User user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Usuário com o id %d não encontrado", id)));
+                .orElseThrow(() -> {
+                    logger.error("Usuário não encontrado ao deletar: userId={}", id);
+                    return new NotFoundException(String.format("Usuário com o id %d não encontrado", id));
+                });
 
         repository.delete(user);
     }
 
     public List<UserDTO> listAllUsers(){
-       return repository.findAll().stream()
-               .map(UserDTO::new)
-               .toList();
+        return repository.findAll().stream()
+                .map(UserDTO::new)
+                .toList();
     }
 }
