@@ -64,4 +64,11 @@ public class LoanController {
         return ResponseEntity.status(204).build();
     }
 
+    @PostMapping("/{id}/return")
+    public ResponseEntity<LoanDTO> returnLoan(@PathVariable Long id) {
+        logger.info("Solicitação de devolução para empréstimo id={}", id);
+        LoanDTO loan = service.returnLoan(id);
+        logger.info("Empréstimo devolvido com sucesso: id={}", id);
+        return ResponseEntity.ok(loan);
+    }
 }

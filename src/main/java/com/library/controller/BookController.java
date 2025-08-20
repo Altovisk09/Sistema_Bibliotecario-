@@ -62,4 +62,19 @@ public class BookController {
         logger.info("Total de livros encontrados: {}", books.size());
         return ResponseEntity.status(200).body(books);
     }
+    @PostMapping("/{id}/borrow")
+    public ResponseEntity<Void> borrowBook(@PathVariable Long id) {
+        logger.info("Solicitação de empréstimo para livro id={}", id);
+        service.decrementAvailableCopies(id);
+        logger.info("Empréstimo realizado com sucesso: id={}", id);
+        return ResponseEntity.status(200).build();
+    }
+
+    @PostMapping("/{id}/return")
+    public ResponseEntity<Void> returnBook(@PathVariable Long id) {
+        logger.info("Solicitação de devolução para livro id={}", id);
+        service.incrementAvailableCopies(id);
+        logger.info("Devolução realizada com sucesso: id={}", id);
+        return ResponseEntity.status(200).build();
+    }
 }

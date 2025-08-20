@@ -6,6 +6,7 @@ import com.library.dto.loan.UpdateLoanDTO;
 import com.library.exceptions.NotFoundException;
 import com.library.model.Book;
 import com.library.model.Loan;
+import com.library.model.LoanStatus;
 import com.library.model.User;
 import com.library.repository.LoanRepository;
 import com.library.repository.UserRepository;
@@ -139,5 +140,22 @@ public class LoanService {
                     logger.error("Empréstimo não encontrado: loanId={}", id);
                     return new NotFoundException("Empréstimo não encontrado com id: " + id);
                 });
+    }
+
+    @Transactional
+    public LoanDTO returnLoan(Long loanId) {
+        Loan loan = getLoanOrThrow(loanId);
+
+        try {
+            bookService.incrementAvailableCopies(loan.getBook().getId());
+        } catch (Exception e) {
+            logger.error("Falha ao devolver livro: bookId={}, erro={}", loan.getBook().getId(), e.getMessage());
+            throw e;
+        }
+
+        loan.setStatus(LoanStatus.RETURNED);
+        loanRepository.save(loan);
+
+        return new LoanDTO(loan);
     }
 }
